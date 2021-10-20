@@ -1,6 +1,6 @@
 # README
 
-The code is based on the framework "rlswiss".
+The code is based on the [ILswiss](https://github.com/Ericonaldo/ILSwiss).
 
 To run the code, use
 
