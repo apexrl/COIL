@@ -1,11 +1,11 @@
 import yaml
 import argparse
 import os
-from os import path as osp
 from time import sleep
 from subprocess import Popen
 import datetime
 import dateutil
+
 from rlkit.launchers import config
 from rlkit.launchers.launcher_util import build_nested_variant_generator
 

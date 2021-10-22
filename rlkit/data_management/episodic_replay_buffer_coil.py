@@ -1,15 +1,12 @@
 import numpy as np
-import random
 import gc
 import heapq
-import traceback
+import torch
 
 from rlkit.data_management.replay_buffer import ReplayBuffer
 from rlkit.data_management.simple_replay_buffer import SimpleReplayBuffer
 import rlkit.torch.pytorch_util as ptu
 from rlkit.core import logger
-
-import torch
 
 
 class EpisodicReplayBuffer(ReplayBuffer):
@@ -27,7 +24,7 @@ class EpisodicReplayBuffer(ReplayBuffer):
             gamma=0.99,
 
             bc_sampling_with_rep=True,
-            act_dif_mode="alpha2",
+            traj_sel_crt="alpha2",
             bc_traj_limit=2,
 
             only_bc=False,
@@ -84,7 +81,7 @@ class EpisodicReplayBuffer(ReplayBuffer):
         self.used_traj_num = 0
 
         self.bc_sampling_with_rep = bc_sampling_with_rep
-        self.act_dif_mode = act_dif_mode
+        self.traj_sel_crt = traj_sel_crt
         self.bc_traj_limit = bc_traj_limit
         print("BC TRAJ LIMIT = ", self.bc_traj_limit)
 
@@ -192,8 +189,8 @@ class EpisodicReplayBuffer(ReplayBuffer):
     def get_pretrain_buffer(self, pretrain_num=-1):
         """
         Return a replay buffer of pretrain data (random trajs).
-
-        :param benchmark_rew: the maximum performance of a random policy; if is "full", returns full buffer
+        :param pretrain_num: the number of trajectories used for pretraining; 
+                             if minus, use all trajectories.
         """
         if pretrain_num == 0:
             return self.get_new_simple_buffer()
@@ -208,20 +205,6 @@ class EpisodicReplayBuffer(ReplayBuffer):
             logger.log(
                 "Pretrained buf: selected num: {}, buffer size {}".format(pretrain_num, pretrain_buffer.get_size()))
             return pretrain_buffer
-
-        # if benchmark_rew == "full":
-        #     pretrain_buffer = self.get_full_buffer()
-        #     logger.log("Pretrained buf: full buffer, buffer size {}".format(pretrain_buffer.get_size()))
-        #     return pretrain_buffer
-        # if self.simple_buffer.get_traj_num() > 0:
-        #     return self.get_new_simple_buffer()
-        #
-        # selected_trajs = [_ for _ in self._data if _['ep_rews'] <= benchmark_rew]
-        # logger.log("Pretrained buf, Random benchmark:{}, Selected num: {}".format(benchmark_rew, len(selected_trajs)))
-        #
-        # for traj in selected_trajs:
-        #     self.simple_buffer.add_path(traj)
-        # return self.simple_buffer
 
     def shrink_buffer(self):
         logger.log("------- SHRINK BUFFER -------")
@@ -241,10 +224,10 @@ class EpisodicReplayBuffer(ReplayBuffer):
     def has_similar_traj(self, policy_func=None, trajs=None):
         if trajs is None:
             trajs = self._data
-        if self.act_dif_mode == "reward":
+        if self.traj_sel_crt == "reward":
             log_ratios = list(reversed(range(len(trajs))))
         else:
-            log_ratios = [action_deriviation(traj, policy_func, mode=self.act_dif_mode) for traj in trajs]
+            log_ratios = [action_deriviation(traj, policy_func, mode=self.traj_sel_crt) for traj in trajs]
         try:
             max_log_ratio = np.max(log_ratios)
         except ValueError:
@@ -265,12 +248,13 @@ class EpisodicReplayBuffer(ReplayBuffer):
         return_trajs = kwargs.get("return_trajs", False)
 
         bc_traj_num = self.bc_traj_limit
-        logger.log("Only bc.")
         selected_ind = heapq.nlargest(bc_traj_num, enumerate(log_ratios), key=lambda x: x[1])
         selected_ind, _ = zip(*selected_ind)
         selected_trajs = [self._data[ind] for ind in selected_ind]
+
         min_reward = np.min([traj["ep_rews"] for traj in selected_trajs])
         self._data = [self._data[ind] for ind in range(len(self._data)) if ind not in selected_ind]
+
         self.used_traj_num += len(selected_trajs)
         training_mode = "bc"
         if self.bc_buffer is not None:
@@ -291,11 +275,10 @@ class EpisodicReplayBuffer(ReplayBuffer):
             except KeyError:
                 traj_order.append(0)
             traj_rews.append(traj["ep_rews"])
-        logger.log("Selected num: {}, Used num: {}, Remaining Num: {}, Max log ratio: {}, "
-                   .format(traj_num, self.used_traj_num, len(self._data), max_log_ratio))
+        logger.log(f"Selected num: {traj_num}, Used num: {self.used_traj_num}, Remaining Num: {len(self._data)}, Max log ratio: {max_log_ratio}, ")
 
         return (self.bc_buffer, selected_trajs) if return_trajs \
-            else self.bc_buffer, training_mode, traj_steps, traj_order, traj_rews, min_reward
+            else (self.bc_buffer, training_mode, traj_steps, traj_order, traj_rews, min_reward)
 
     def get_bc_buffer(self):
         return self.bc_buffer
@@ -395,7 +378,6 @@ def action_deriviation(traj, policy_func, mode="alpha2"):
 
     if mode == "is":
         res = np.min(log_prob)
-        # print('res1', res)
     elif mode == "mean":
         res = np.mean(log_prob)
     elif mode == "median":

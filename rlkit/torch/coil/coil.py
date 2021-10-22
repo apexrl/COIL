@@ -28,9 +28,9 @@ class COIL(Trainer):
         )
 
         self.use_l2 = kwargs.get("use_l2", True)
-        print("USE L2 NORM: ", self.use_l2)
+        print("Use L2 norm: ", self.use_l2)
         self.bc_mode = kwargs.get("bc_mode", "mle")
-        print("BC MODE: ", self.bc_mode)
+        print("BC mode: ", self.bc_mode)
         assert self.bc_mode == "mse" or self.bc_mode == "mle", "Invalid BC mode!"
 
         self.eval_statistics = None
@@ -81,16 +81,3 @@ class COIL(Trainer):
     def end_epoch(self):
         print("END_EPOCH")
         self.eval_statistics = None
-
-
-def clip_gradient(optimizer, grad_clip=0.5):
-    """
-    Clips gradients computed during backpropagation to avoid explosion of gradients.
-
-    :param optimizer: optimizer with the gradients to be clipped
-    :param grad_clip: clip value
-    """
-    for group in optimizer.param_groups:
-        for param in group["params"]:
-            if param.grad is not None:
-                param.grad.data.clamp_(-grad_clip, grad_clip)

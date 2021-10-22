@@ -15,7 +15,7 @@ print(sys.path)
 from rlkit.envs import get_env
 from rlkit.launchers.launcher_util import setup_logger, set_seed
 import rlkit.torch.pytorch_util as ptu
-from rlkit.torch.sac.coil import COIL
+from rlkit.torch.coil.coil import COIL
 from rlkit.torch.sac.policies import ReparamTanhMultivariateGaussianPolicy
 from rlkit.torch.phase_offline.phase_offline_coil import PhaseOffline
 from rlkit.envs.wrappers import ScaledEnv
@@ -26,7 +26,7 @@ random_benchmark_rews = {'hopper': 0, 'walker': -50, 'halfcheetah': -302.608, 'i
 
 def experiment(variant, **kwargs):
     with open('demos_listing.yaml', 'r') as f:
-        listings = yaml.load(f.read(), )
+        listings = yaml.load(f.read())
     demos_path = listings[variant['dataset_name']]['file_paths'][0]
     print("demos_path", demos_path)
     with open(demos_path, 'rb') as f:

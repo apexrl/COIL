@@ -5,12 +5,11 @@ from collections import OrderedDict
 import gtimer as gt
 
 from rlkit.torch.core import np_to_pytorch_batch
-from rlkit.core import eval_util
+from rlkit.core import eval_util, logger
 from rlkit.torch.torch_base_algorithm import TorchBaseAlgorithm
 from rlkit.data_management.path_builder import PathBuilder
 from rlkit.data_management.episodic_replay_buffer_coil import EpisodicReplayBuffer
-from rlkit.torch.sac.coil import COIL
-from rlkit.core import logger
+from rlkit.torch.coil.coil import COIL
 
 
 class PhaseOffline(TorchBaseAlgorithm):
@@ -44,7 +43,6 @@ class PhaseOffline(TorchBaseAlgorithm):
         super().__init__(**kwargs)
 
         self.mode = mode
-        self.random_reward = random_reward
         self.pretrain_times = pretrain_times
         self.pretrain_num = pretrain_num
 
@@ -95,8 +93,6 @@ class PhaseOffline(TorchBaseAlgorithm):
                         gt.stamp('sample')
                         self._try_to_train(epoch)
                         gt.stamp('train')
-                # if 360 <= epoch <= 420 and epoch % 10 == 0:
-                #     self._special_save(epoch)
             except ValueError:
                 out_of_data = True
                 break

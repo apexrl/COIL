@@ -23,7 +23,6 @@ dependencies:
   - freetype=2.5.5=2
   - gcc_impl_linux-64=7.2.0=habb00fd_3
   - gcc_linux-64=7.2.0=h550dcbe_27
-#  - geos=3.6.2=hfc679d8_4
   - glib=2.56.1=h000015b_0
   - gst-plugins-base=1.14.0=hbbd80ab_1
   - gstreamer=1.14.0=hb453b48_1
@@ -116,7 +115,6 @@ dependencies:
     - pyopengl==3.1.0
     - requests==2.21.0
     - urllib3==1.24.1
-    
     - geos==3.6.2
 prefix: /h/kamyar/.conda/envs/rl_swiss
 

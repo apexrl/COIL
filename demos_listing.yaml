@@ -1,101 +1,92 @@
+# Put names and directories of datasets in this file.
+# The followings are demonstrations of D4RL datasets.
+
 hopper_rd:
   description: "Hopper, random"
   file_paths: [
-    ../traj_dataset/hopper-random-v0.pkl
+    traj_dataset/hopper-random-v0.pkl
   ]
 
 hopper_md:
   description: "Hopper, medium"
   file_paths: [
-    ../traj_dataset/hopper-medium-v0.pkl
+    traj_dataset/hopper-medium-v0.pkl
   ]
 
 hopper_mr:
   description: "Hopper, medium replay"
   file_paths: [
-    ../traj_dataset/hopper-medium-replay-v0.pkl
+    traj_dataset/hopper-medium-replay-v0.pkl
   ]
 
 hopper_me:
   description: "Hopper, medium expert"
   file_paths: [
-    ../traj_dataset/hopper-medium-expert-v0.pkl
+    traj_dataset/hopper-medium-expert-v0.pkl
   ]
 
 hopper_ex:
   description: "Hopper, expert"
   file_paths: [
-    ../traj_dataset/hopper-expert-v0.pkl
-  ]
-
-hopper_ex_64:
-  description: "Hopper, expert 64 trajs"
-  file_paths: [
-      ../traj_dataset/hopper_expert_64.pkl
-  ]
-
-hopper_ex_1024:
-  description: "Hopper, expert 1024 trajs"
-  file_paths: [
-      ../traj_dataset/hopper_expert_1024.pkl
+    traj_dataset/hopper-expert-v0.pkl
   ]
 
 walker2d_rd:
   description: "Walker2d, random"
   file_paths: [
-    ../traj_dataset/walker2d-random-v0.pkl
+    traj_dataset/walker2d-random-v0.pkl
   ]
 
 walker2d_md:
   description: "Walker2d, medium"
   file_paths: [
-    ../traj_dataset/walker2d-medium-v0.pkl
+    traj_dataset/walker2d-medium-v0.pkl
   ]
 
 walker2d_mr:
   description: "Walker2d, medium replay"
   file_paths: [
-    ../traj_dataset/walker2d-medium-replay-v0.pkl
+    traj_dataset/walker2d-medium-replay-v0.pkl
   ]
 
 walker2d_me:
   description: "Walker2d, medium expert"
   file_paths: [
-      ../traj_dataset/walker2d-medium-expert-v0.pkl
+    traj_dataset/walker2d-medium-expert-v0.pkl
   ]
 
 walker2d_ex:
   description: "Walker2d, expert"
   file_paths: [
-      ../traj_dataset/walker2d-expert-v0.pkl
+    traj_dataset/walker2d-expert-v0.pkl
   ]
 
 halfcheetah_rd:
   description: "HalfCheetah, random"
   file_paths: [
-    ../traj_dataset/halfcheetah-random-v0.pkl
+    traj_dataset/halfcheetah-random-v0.pkl
   ]
 
 halfcheetah_md:
   description: "HalfCheetah, medium"
   file_paths: [
-    ../traj_dataset/halfcheetah-medium-v0.pkl
+    traj_dataset/halfcheetah-medium-v0.pkl
   ]
 
 halfcheetah_mr:
   description: "HalfCheetah, medium replay"
   file_paths: [
-    ../traj_dataset/halfcheetah-medium-replay-v0.pkl
+    traj_dataset/halfcheetah-medium-replay-v0.pkl
   ]
 
 halfcheetah_me:
   description: "HalfCheetah, medium expert"
   file_paths: [
-    ../traj_dataset/halfcheetah-medium-expert-v0.pkl
+    traj_dataset/halfcheetah-medium-expert-v0.pkl
   ]
 
 halfcheetah_ex:
   description: "HalfCheetah, expert"
   file_paths: [
-      ../traj_dataset/halfcheetah-expert-v0.pkl
+    traj_dataset/halfcheetah-expert-v0.pkl
   ]

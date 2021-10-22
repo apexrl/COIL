@@ -1,15 +1,11 @@
 import numpy as np
-from numpy.random import choice
-
 import torch
 from torch import nn as nn
 
 from rlkit.policies.base import ExplorationPolicy, Policy
 from rlkit.torch.distributions import ReparamTanhMultivariateNormal
 from rlkit.torch.distributions import ReparamMultivariateNormalDiag
-from rlkit.torch.networks import Mlp, Ant2DCustomLayerV1
-from rlkit.torch.core import PyTorchModule
-
+from rlkit.torch.networks import Mlp
 import rlkit.torch.pytorch_util as ptu
 
 LOG_SIG_MAX = 2
@@ -44,11 +40,8 @@ class MakeDeterministic(Policy):
 class DiscretePolicy(Mlp, ExplorationPolicy):
     """
     Usage:
-
-    ```
     policy = DiscretePolicy(...)
     action, log_prob = policy(obs, return_log_prob=True)
-    ```
     """
     def __init__(
             self,
@@ -94,20 +87,6 @@ class DiscretePolicy(Mlp, ExplorationPolicy):
 
             idx = torch.unsqueeze(idx, 1)
             log_prob = torch.gather(log_probs, 1, idx)
-
-            # # print(log_probs.size(-1))
-            # # print(log_probs.data.numpy())
-            # # print(np.exp(log_probs.data.numpy()))
-            # idx = choice(
-            #     log_probs.size(-1),
-            #     size=1,
-            #     p=np.exp(log_probs.data.numpy())
-            # )
-            # log_prob = log_probs[0,idx]
-
-            # print(idx)
-            # print(log_prob)
-
             return (idx, log_prob)
     
     def get_log_pis(self, obs):
@@ -145,7 +124,6 @@ class MlpPolicy(Mlp, ExplorationPolicy):
         return self.eval_np(obs_np)[0]
 
 
-
 class ReparamTanhMultivariateGaussianPolicy(Mlp, ExplorationPolicy):
     """
     Usage:
@@ -162,7 +140,7 @@ class ReparamTanhMultivariateGaussianPolicy(Mlp, ExplorationPolicy):
 
     If deterministic is True, action = tanh(mean).
     If return_log_prob is False (default), log_prob = None
-        This is done because computing the log_prob can be a bit expensive.
+    This is done because computing the log_prob can be a bit expensive.
     """
     def __init__(
             self,
@@ -191,8 +169,6 @@ class ReparamTanhMultivariateGaussianPolicy(Mlp, ExplorationPolicy):
             self.last_fc_log_std.weight.data.uniform_(-init_w, init_w)
             self.last_fc_log_std.bias.data.uniform_(-init_w, init_w)
         else:
-            # self.log_std = np.log(std)
-            # assert LOG_SIG_MIN <= self.log_std <= LOG_SIG_MAX
             assert LOG_SIG_MIN <= np.log(std) <= LOG_SIG_MAX
             std = std * np.ones((1, action_dim))
             self.log_std = ptu.from_numpy(np.log(std), requires_grad=False)
@@ -223,17 +199,12 @@ class ReparamTanhMultivariateGaussianPolicy(Mlp, ExplorationPolicy):
         :param deterministic: If True, do not sample
         :param return_log_prob: If True, return a sample and its log probability
         """
-        # print('forward')
-        # print(obs.shape)
         h = obs
         for i, fc in enumerate(self.fcs):
             h = self.hidden_activation(fc(h))
             if self.dropout is not None:
                 h = self.dropouts[i](h)
-        # print('fuck')
-        # print(h)
         mean = self.last_fc(h)
-        # print(mean)
         if self.std is None:
             log_std = self.last_fc_log_std(h)
             log_std = torch.clamp(log_std, LOG_SIG_MIN, LOG_SIG_MAX)
@@ -250,9 +221,6 @@ class ReparamTanhMultivariateGaussianPolicy(Mlp, ExplorationPolicy):
             action = torch.tanh(mean)
         else:
             tanh_normal = ReparamTanhMultivariateNormal(mean, log_std)
-            # print('mean, std')
-            # print(mean)
-            # print(log_std)
             if return_log_prob:
                 action, pre_tanh_value = tanh_normal.sample(
                     return_pretanh_value=True
@@ -264,7 +232,6 @@ class ReparamTanhMultivariateGaussianPolicy(Mlp, ExplorationPolicy):
             else:
                 action = tanh_normal.sample()
 
-        # I'm doing it like this for now for backwards compatibility, sorry!
         if return_tanh_normal:
             return (
                 action, mean, log_std, log_prob, expected_log_prob, std,
@@ -291,15 +258,9 @@ class ReparamTanhMultivariateGaussianPolicy(Mlp, ExplorationPolicy):
         tanh_normal = ReparamTanhMultivariateNormal(mean, log_std)
         log_prob = tanh_normal.log_prob(acts, pre_tanh_value, squash=squash)
 
-        # print('\n\n\n\n\nGet log prob')
-        # print(log_prob)
-        # print(mean)
-        # print(log_std)
-
         if return_normal_params:
             return log_prob, mean, log_std
         return log_prob
-
 
 
 class ReparamMultivariateGaussianPolicy(Mlp, ExplorationPolicy):
@@ -353,24 +314,15 @@ class ReparamMultivariateGaussianPolicy(Mlp, ExplorationPolicy):
         :param deterministic: If True, do not sample
         :param return_log_prob: If True, return a sample and its log probability
         """
-        # print('forward')
-        # print(obs)
         h = obs
         for i, fc in enumerate(self.fcs):
             h = self.hidden_activation(fc(h))
-        # print('fuck')
-        # print(h)
         mean = self.last_fc(h)
-
         mean = torch.clamp(mean, min=-1.0, max=1.0)
 
-        # print(mean)
         if self.std is None:
             log_std = self.last_fc_log_std(h)
-            
-            # log_std = torch.clamp(log_std, LOG_SIG_MIN, LOG_SIG_MAX)
             log_std = torch.clamp(log_std, LOG_SIG_MIN, np.log(0.2))
-            
             std = torch.exp(log_std)
 
         else:
@@ -388,7 +340,6 @@ class ReparamMultivariateGaussianPolicy(Mlp, ExplorationPolicy):
             if return_log_prob:
                 log_prob = normal.log_prob(action)
 
-        # I'm doing it like this for now for backwards compatibility, sorry!
         if return_normal:
             return (
                 action, mean, log_std, log_prob, expected_log_prob, std,
@@ -418,4 +369,3 @@ class ReparamMultivariateGaussianPolicy(Mlp, ExplorationPolicy):
         if return_normal_params:
             return log_prob, mean, log_std
         return log_prob
-
