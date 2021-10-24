@@ -374,7 +374,7 @@ def action_deriviation(traj, policy_func, mode="alpha2"):
     log_prob = policy_func.get_log_prob(obs, acts, return_normal_params=True)[0]
     log_prob = log_prob.detach().cpu().squeeze().numpy()
 
-    res = 1
+    res = 1.0
 
     if mode == "is":
         res = np.min(log_prob)

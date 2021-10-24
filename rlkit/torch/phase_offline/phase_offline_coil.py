@@ -23,7 +23,7 @@ class PhaseOffline(TorchBaseAlgorithm):
         policy_trainer: COIL,
 
         replay_buffer: EpisodicReplayBuffer,
-        random_reward=100,
+        min_reward=100,
         pretrain_times=0,
         pretrain_num=-1,
 
@@ -64,7 +64,7 @@ class PhaseOffline(TorchBaseAlgorithm):
         self.min_traj_reward = []
         self.filter_type = filter_type
         if self.filter_type == "running_mean":
-            self.running_mean = min(0, random_reward)
+            self.running_mean = min(0, min_reward)
             self.filter_tau = filter_tau if filter_tau else 0.99
         self.shrink_buffer = kwargs.get("shrink_buffer", False)
         self.shrink_count = 0

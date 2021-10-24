@@ -4,7 +4,9 @@ The code is based on the [ILswiss](https://github.com/Ericonaldo/ILSwiss).
 
 To run the code, use
 
-`python run_experiment.py --srun -e <your YAML file> -g <gpu id>`.
+`python run_experiment.py --nosrun -e <your YAML file> -g <gpu id>`,
+
+or `python run_experimtn.py -e <your YAML file>` to enable [srun](https://slurm.schedmd.com/srun.html).
 
 Generally,  `run_experiment.py` loads the YAML file, creating multiple processes, each of which runs the script assigned in the YAML file. 
 

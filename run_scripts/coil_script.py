@@ -21,8 +21,6 @@ from rlkit.torch.phase_offline.phase_offline_coil import PhaseOffline
 from rlkit.envs.wrappers import ScaledEnv
 from rlkit.data_management.episodic_replay_buffer_coil import EpisodicReplayBuffer
 
-random_benchmark_rews = {'hopper': 0, 'walker': -50, 'halfcheetah': -302.608, 'ipendulum': 0, 'idpendulum': 0}
-
 
 def experiment(variant, **kwargs):
     with open('demos_listing.yaml', 'r') as f:
@@ -57,7 +55,7 @@ def experiment(variant, **kwargs):
     variant.setdefault('data_aug', 1)
     replay_buffer = EpisodicReplayBuffer(max_replay_buffer_size, max_sub_buf_size, observation_dim, action_dim,
                                          env_specs['eval_env_seed'], variant['sac_params']['discount'],
-                                         variant['bc_sampling_with_rep'], variant['act_dif_mode'],
+                                         variant['bc_sampling_with_rep'], variant['traj_sel_crt'],
                                          variant['bc_traj_limit'], variant['only_bc'], variant['data_aug'])
     filter_percent = variant.get('filter_percent', 1)
     return_stat = variant['scale_env_with_demo_stats']
@@ -107,7 +105,7 @@ def experiment(variant, **kwargs):
     # set up the algorithm
     trainer = COIL(
         policy=policy,
-        **variant['sac_params']
+        **variant['coil_params']
     )
 
     algorithm = PhaseOffline(
@@ -117,7 +115,7 @@ def experiment(variant, **kwargs):
 
         policy_trainer=trainer,
         replay_buffer=replay_buffer,
-        random_reward=random_benchmark_rews[env_name],
+        min_reward=min_rew,
         **variant['offline_params']
     )
 
