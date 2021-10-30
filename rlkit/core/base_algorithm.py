@@ -15,7 +15,6 @@ from rlkit.data_management.path_builder import PathBuilder
 from rlkit.policies.base import ExplorationPolicy
 from rlkit.torch.sac.policies import MakeDeterministic
 from rlkit.samplers import PathSampler
-from rlkit.envs.wrapped_absorbing_env import WrappedAbsorbingEnv
 
 from gym.spaces import Dict
 

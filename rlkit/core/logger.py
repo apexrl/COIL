@@ -21,7 +21,7 @@ import errno
 import pickle
 
 from rlkit.core.tabulate import tabulate
-
+from torch.utils.tensorboard import SummaryWriter
 
 def mkdir_p(path):
     try:
@@ -34,10 +34,10 @@ def mkdir_p(path):
 
 
 _prefixes = []
-_prefix_str = ''
+_prefix_str = ""
 
 _tabular_prefixes = []
-_tabular_prefix_str = ''
+_tabular_prefix_str = ""
 
 _tabular = []
 
@@ -49,14 +49,17 @@ _tabular_fds = {}
 _tabular_header_written = set()
 
 _snapshot_dir = None
-_snapshot_mode = 'all'
+_snapshot_mode = "all"
 _snapshot_gap = 1
 
 _log_tabular_only = False
 _header_printed = False
+_log_tboard = True
+_step_key = "Epoch"
 
+_summary_writer = None
 
-def _add_output(file_name, arr, fds, mode='a'):
+def _add_output(file_name, arr, fds, mode="a"):
     if file_name not in arr:
         mkdir_p(os.path.dirname(file_name))
         arr.append(file_name)
@@ -73,11 +76,11 @@ def _remove_output(file_name, arr, fds):
 def push_prefix(prefix):
     _prefixes.append(prefix)
     global _prefix_str
-    _prefix_str = ''.join(_prefixes)
+    _prefix_str = "".join(_prefixes)
 
 
 def add_text_output(file_name):
-    _add_output(file_name, _text_outputs, _text_fds, mode='a')
+    _add_output(file_name, _text_outputs, _text_fds, mode="a")
 
 
 def remove_text_output(file_name):
@@ -85,7 +88,7 @@ def remove_text_output(file_name):
 
 
 def add_tabular_output(file_name):
-    _add_output(file_name, _tabular_outputs, _tabular_fds, mode='w')
+    _add_output(file_name, _tabular_outputs, _tabular_fds, mode="w")
 
 
 def remove_tabular_output(file_name):
@@ -93,10 +96,18 @@ def remove_tabular_output(file_name):
         _tabular_header_written.remove(_tabular_fds[file_name])
     _remove_output(file_name, _tabular_outputs, _tabular_fds)
 
+def set_tboard(dir_name, name='tboard'):
+    log_path = osp.join(dir_name, name)
+    global _summary_writer
+    _summary_writer = SummaryWriter(log_path)
+    
 
-def set_snapshot_dir(dir_name):
-    global _snapshot_dir
+def set_snapshot_dir(dir_name, log_tboard=True):
+    global _snapshot_dir, _log_tboard
     _snapshot_dir = dir_name
+    _log_tboard = log_tboard
+    if log_tboard:
+        set_tboard(dir_name)
 
 
 def get_snapshot_dir():
@@ -129,6 +140,16 @@ def set_log_tabular_only(log_tabular_only):
 def get_log_tabular_only():
     return _log_tabular_only
 
+def set_log_tboard(log_tboard):
+    global _log_tboard
+    _log_tboard = log_tboard
+
+
+def get_log_tboard():
+    return _log_tboard
+
+def record_tboard(key, x, y, **kwargs) -> None:
+    _summary_writer.add_scalar(key, y, global_step=x)
 
 def log(s, with_prefix=True, with_timestamp=True):
     out = s
@@ -136,13 +157,13 @@ def log(s, with_prefix=True, with_timestamp=True):
         out = _prefix_str + out
     if with_timestamp:
         now = datetime.datetime.now(dateutil.tz.tzlocal())
-        timestamp = now.strftime('%Y-%m-%d %H:%M:%S.%f %Z')
+        timestamp = now.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
         out = "%s | %s" % (timestamp, out)
     if not _log_tabular_only:
         # Also log to stdout
         print(out)
         for fd in list(_text_fds.values()):
-            fd.write(out + '\n')
+            fd.write(out + "\n")
             fd.flush()
         sys.stdout.flush()
 
@@ -154,16 +175,16 @@ def record_tabular(key, val):
 def push_tabular_prefix(key):
     _tabular_prefixes.append(key)
     global _tabular_prefix_str
-    _tabular_prefix_str = ''.join(_tabular_prefixes)
+    _tabular_prefix_str = "".join(_tabular_prefixes)
 
 
 def pop_tabular_prefix():
     del _tabular_prefixes[-1]
     global _tabular_prefix_str
-    _tabular_prefix_str = ''.join(_tabular_prefixes)
+    _tabular_prefix_str = "".join(_tabular_prefixes)
 
 
-def save_extra_data(data, name='extra_data.pkl'):
+def save_extra_data(data, name="extra_data.pkl"):
     """
     Data saved here will always override the last entry
 
@@ -212,8 +233,9 @@ class TerminalTablePrinter(object):
 
     def refresh(self):
         import os
-        rows, columns = os.popen('stty size', 'r').read().split()
-        tabulars = self.tabulars[-(int(rows) - 3):]
+
+        rows, columns = os.popen("stty size", "r").read().split()
+        tabulars = self.tabulars[-(int(rows) - 3) :]
         sys.stdout.write("\x1b[2J\x1b[H")
         sys.stdout.write(tabulate(tabulars, self.headers))
         sys.stdout.write("\n")
@@ -228,48 +250,56 @@ def dump_tabular(*args, **kwargs):
         if _log_tabular_only:
             table_printer.print_tabular(_tabular)
         else:
-            for line in tabulate(_tabular).split('\n'):
+            for line in tabulate(_tabular).split("\n"):
                 log(line, *args, **kwargs)
         tabular_dict = dict(_tabular)
         # Also write to the csv files
         # This assumes that the keys in each iteration won't change!
         for tabular_fd in list(_tabular_fds.values()):
-            writer = csv.DictWriter(tabular_fd,
-                                    fieldnames=list(tabular_dict.keys()))
+            writer = csv.DictWriter(tabular_fd, fieldnames=list(tabular_dict.keys()))
             if wh or (wh is None and tabular_fd not in _tabular_header_written):
                 writer.writeheader()
                 _tabular_header_written.add(tabular_fd)
             writer.writerow(tabular_dict)
             tabular_fd.flush()
+
         del _tabular[:]
+        
+        # Try to write in tensorboard
+        if _log_tboard:
+            assert _summary_writer is not None, "summary writer is none!"
+            step = tabular_dict[_step_key]
+            for key in tabular_dict.keys():
+                if key != _step_key:
+                    record_tboard(key, step, np.array(tabular_dict[key]))
 
 
 def pop_prefix():
     del _prefixes[-1]
     global _prefix_str
-    _prefix_str = ''.join(_prefixes)
+    _prefix_str = "".join(_prefixes)
 
 
 def save_itr_params(itr, params):
     if _snapshot_dir:
-        if _snapshot_mode == 'all':
-            file_name = osp.join(_snapshot_dir, 'itr_%d.pkl' % itr)
+        if _snapshot_mode == "all":
+            file_name = osp.join(_snapshot_dir, "itr_%d.pkl" % itr)
             joblib.dump(params, file_name, compress=3)
-        elif _snapshot_mode == 'last':
+        elif _snapshot_mode == "last":
             # override previous params
-            file_name = osp.join(_snapshot_dir, 'params.pkl')
+            file_name = osp.join(_snapshot_dir, "params.pkl")
             joblib.dump(params, file_name, compress=3)
         elif _snapshot_mode == "gap":
             if itr % _snapshot_gap == 0:
-                file_name = osp.join(_snapshot_dir, 'itr_%d.pkl' % itr)
+                file_name = osp.join(_snapshot_dir, "itr_%d.pkl" % itr)
                 joblib.dump(params, file_name, compress=3)
         elif _snapshot_mode == "gap_and_last":
             if itr % _snapshot_gap == 0:
-                file_name = osp.join(_snapshot_dir, 'itr_%d.pkl' % itr)
+                file_name = osp.join(_snapshot_dir, "itr_%d.pkl" % itr)
                 joblib.dump(params, file_name, compress=3)
-            file_name = osp.join(_snapshot_dir, 'params.pkl')
+            file_name = osp.join(_snapshot_dir, "params.pkl")
             joblib.dump(params, file_name, compress=3)
-        elif _snapshot_mode == 'none':
+        elif _snapshot_mode == "none":
             pass
         else:
             raise NotImplementedError
@@ -278,10 +308,9 @@ def save_itr_params(itr, params):
 class MyEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, type):
-            return {'$class': o.__module__ + "." + o.__name__}
+            return {"$class": o.__module__ + "." + o.__name__}
         elif isinstance(o, Enum):
-            return {
-                '$enum': o.__module__ + "." + o.__class__.__name__ + '.' + o.name}
+            return {"$enum": o.__module__ + "." + o.__class__.__name__ + "." + o.name}
         return json.JSONEncoder.default(self, o)
 
 
@@ -291,8 +320,8 @@ def log_variant(log_file, variant_data):
         json.dump(variant_data, f, indent=2, sort_keys=True, cls=MyEncoder)
 
 
-def record_tabular_misc_stat(key, values, placement='back'):
-    if placement == 'front':
+def record_tabular_misc_stat(key, values, placement="back"):
+    if placement == "front":
         prefix = ""
         suffix = key
     else:

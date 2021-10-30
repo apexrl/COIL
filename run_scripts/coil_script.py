@@ -54,7 +54,7 @@ def experiment(variant, **kwargs):
     variant.setdefault('only_bc', False)
     variant.setdefault('data_aug', 1)
     replay_buffer = EpisodicReplayBuffer(max_replay_buffer_size, max_sub_buf_size, observation_dim, action_dim,
-                                         env_specs['eval_env_seed'], variant['sac_params']['discount'],
+                                         env_specs['eval_env_seed'], variant['coil_params']['discount'],
                                          variant['bc_sampling_with_rep'], variant['traj_sel_crt'],
                                          variant['bc_traj_limit'], variant['only_bc'], variant['data_aug'])
     filter_percent = variant.get('filter_percent', 1)

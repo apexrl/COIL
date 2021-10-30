@@ -83,6 +83,7 @@ constants:
     policy_mean_reg_weight: 0.001
     policy_std_reg_weight: 0.001
     use_l2: false
+    discount: 0.99
 
   env_specs:
     env_name: 'hopper' # environment name

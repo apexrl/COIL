@@ -1,3 +1,3 @@
-LOCAL_LOG_DIR = '../logs/'
+LOCAL_LOG_DIR = './logs/'
 
-OUTPUT_DIR_FOR_DOODAD_TARGET = '../output/'
+OUTPUT_DIR_FOR_DOODAD_TARGET = './output/'
