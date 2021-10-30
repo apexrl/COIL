@@ -13,7 +13,6 @@ if __name__ == '__main__':
     # Arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--experiment', help='experiment specification file')
-    parser.add_argument('--nosrun', help='don\'t use srun', action='store_true')
     parser.add_argument('-g', '--gpu', help='gpu id', type=int, default=0)
     parser.add_argument('--snapshot', help='load from snapshot', default=None)
     args = parser.parse_args()
@@ -50,10 +49,7 @@ if __name__ == '__main__':
     # run the processes
     running_processes = []
     args_idx = 0
-    if args.nosrun:
-        command = 'python {script_path} -e {specs} -g {gpuid}' if args.snapshot is None else 'python {script_path} -e {specs} -g {gpuid} --snapshot {snapshot}'
-    else:
-        command = 'srun --gres=gpu:{num_gpu_per_worker} -c {num_cpu_per_worker} --mem {mem_per_worker} {node_exclusions} -p {partitions} python {script_path} -e {specs}'
+    command = 'python {script_path} -e {specs} -g {gpuid}' if args.snapshot is None else 'python {script_path} -e {specs} -g {gpuid} --snapshot {snapshot}'
     
     command_format_dict = exp_specs['meta_data']
 
