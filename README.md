@@ -3,7 +3,7 @@
 Implementation for NeurIPS 2021 paper "Curriculum Offline Imitation Learning". 
 
 Poster:
-![poster](https://github.com/apexrl/COIL/NIPS-Poster-COIL.png)
+![poster](https://github.com/apexrl/COIL/blob/master/NIPS-Poster-COIL.png)
 
 The code is based on the [ILswiss](https://github.com/Ericonaldo/ILSwiss).
 
