@@ -1,54 +1,55 @@
 meta_data:
   script_path: run_scripts/coil_script.py
-  exp_name: test_on_hopper_mr
-  description: hopper medium replay
+  exp_name: test_on_halfcheetah_md
+  description: halfcheetah medium
   num_workers: 5
-  num_gpu_per_worker: 1
+  num_gpu_per_worker: 1 
   num_cpu_per_worker: 32 
   mem_per_worker: 4gb
   partitions: cpu
   node_exclusions: gpu048,gpu024,gpu025,gpu012,gpu027
   extra_info: ~
+
 # -----------------------------------------------------------------------------
 variables:
   offline_params:
-    num_bc_update_loops_per_train_call: [ 100 ]
-    filter_tau: [ 0.9 ]
-  bc_traj_limit: [ 2 ]
+    num_bc_update_loops_per_train_call: [ 200 ]
+    filter_tau: [ 0.85 ]
+    pretrain_times: [ 40000 ]
+  bc_traj_limit: [ 1 ]
   traj_sel_crt: [ alpha2 ]
   coil_params:
-    policy_lr: [ 0.00003 ]
+    policy_lr: [ 0.0001 ]
   seed: [ 0, 1, 2, 3, 4 ]
 
 # -----------------------------------------------------------------------------
 constants:
   test: false # true
-  dataset_name: 'hopper_mr'
+  dataset_name: 'halfcheetah_md'
   scale_env_with_demo_stats: false
   only_bc: true
 
   policy_net_size: 256
   policy_num_hidden_layers: 2
 
-  sub_buf_size: 1000000
+  sub_buf_size: 2000000
   use_epsilon_decay: false
-  epsilon_min_or_init: 0.5
+  epsilon_min_or_init: -0.693
   epsilon_decay: 1.5
   bc_sampling_with_rep: true
-  # traj_sel_crt: alpha2
-  rl_traj_limit: 4
-  # bc_traj_limit: 4
+  rl_traj_limit: 8
   filter_percent: 1.00
   gaussian_std: 1.0
 
   offline_params:
-    mode: "reward"
+    mode: "reward" 
 
     num_epochs: 1000
     num_steps_per_epoch: 10000
     num_steps_between_train_calls: 2500
     max_path_length: 1000
     min_steps_before_training: 0
+    # pretrain_times: 10000
 
     eval_deterministic: true
     num_steps_per_eval: 50000
@@ -57,7 +58,6 @@ constants:
     wrap_absorbing: false
 
     num_policy_update_loops_per_train_call: 20
-    # num_bc_update_loops_per_train_call: 20
     num_policy_updates_per_loop_iter: 1
 
     use_grad_pen: false
@@ -71,10 +71,9 @@ constants:
     save_algorithm: false
 
     filter_type: running_mean
-    # filter_tau: 0.90
     shrink_buffer: false
 
-  coil_params:
+  sac_params:
     beta_1: 0.25
     # policy_lr: 0.0003
     policy_mean_reg_weight: 0.001
@@ -82,7 +81,7 @@ constants:
     use_l2: false
 
   env_specs:
-    env_name: 'hopper'
+    env_name: 'halfcheetah'
     env_kwargs: {}
     eval_env_seed: 78236
     training_env_seed: 24495

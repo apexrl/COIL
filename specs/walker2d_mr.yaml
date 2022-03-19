@@ -1,37 +1,29 @@
-# this is a demo file for experiment spec
-# please refer to the code for more parameter usage
-
-# meta_data is passed to 'run_experiment.py'
 meta_data:
-  script_path: run_scripts/coil_script.py # the script to run
-  exp_name: demo_exp # name of the experiment, used for generating names of log files
-  description: this is a demo file # description, for human reading
-  # srun settings
-  num_workers: 2
+  script_path: run_scripts/coil_script.py
+  exp_name: test_on_walker2d_mr
+  description: walker2d medium replay
+  num_workers: 5
   num_gpu_per_worker: 1
-  num_cpu_per_worker: 32
+  num_cpu_per_worker: 32 
   mem_per_worker: 4gb
   partitions: cpu
   node_exclusions: gpu048,gpu024,gpu025,gpu012,gpu027
-  # extra information of the experiment
-  extra_info: extra_info # used for generating names of log files, could leave blank
-
+  extra_info: ~
 # -----------------------------------------------------------------------------
-# each combination generates an experiment process
-# could be used for param searching or multi-seed running
 variables:
   offline_params:
-    num_bc_update_loops_per_train_call: [ 100 ]
-    filter_tau: [ 0.85, 0.9, 0.95 ]
-  bc_traj_limit: [ 2 ]
+    num_bc_update_loops_per_train_call: [ 50 ]
+    filter_tau: [ 0.85 ]
+  bc_traj_limit: [ 1 ]
   traj_sel_crt: [ alpha2 ]
-  seed: [ 0, 1, 2 ]
+  coil_params:
+    policy_lr: [ 0.00003 ]
+  seed: [ 0, 1, 2, 3, 4 ]
 
 # -----------------------------------------------------------------------------
-# params already in 'variables' cannot duplicate in 'constants'
 constants:
-  test: false
-  dataset_name: 'hopper_mr' # the list of names of dataset is in 'demos_listing.yaml'
+  test: false # true
+  dataset_name: 'walker2d_mr'
   scale_env_with_demo_stats: false
   only_bc: true
 
@@ -43,12 +35,14 @@ constants:
   epsilon_min_or_init: 0.5
   epsilon_decay: 1.5
   bc_sampling_with_rep: true
+  # traj_sel_crt: alpha2
   rl_traj_limit: 4
+  # bc_traj_limit: 4
   filter_percent: 1.00
   gaussian_std: 1.0
 
   offline_params:
-    mode: 'reward'
+    mode: "reward"
 
     num_epochs: 1000
     num_steps_per_epoch: 10000
@@ -56,13 +50,14 @@ constants:
     max_path_length: 1000
     min_steps_before_training: 0
 
-    eval_deterministic: true # use deterministic policy in online evaluation
+    eval_deterministic: true
     num_steps_per_eval: 50000
 
     no_terminal: false
     wrap_absorbing: false
 
     num_policy_update_loops_per_train_call: 20
+    # num_bc_update_loops_per_train_call: 20
     num_policy_updates_per_loop_iter: 1
 
     use_grad_pen: false
@@ -76,19 +71,18 @@ constants:
     save_algorithm: false
 
     filter_type: running_mean
+    # filter_tau: 0.90
     shrink_buffer: false
 
   coil_params:
     beta_1: 0.25
-    policy_lr: 0.0003
+    # policy_lr: 0.0003
     policy_mean_reg_weight: 0.001
     policy_std_reg_weight: 0.001
     use_l2: false
 
   env_specs:
-    env_name: 'hopper' # environment name
-    # the environment name list is in rlkit/envs/envs_dict
-    # you can customize environments by adding new environment info in this file
-    env_kwargs: { }
+    env_name: 'walker'
+    env_kwargs: {}
     eval_env_seed: 78236
     training_env_seed: 24495
