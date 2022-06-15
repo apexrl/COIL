@@ -76,7 +76,7 @@ constants:
     filter_type: running_mean
     shrink_buffer: false
 
-  sac_params:
+  coil_params:
     beta_1: 0.25
     # policy_lr: 0.0003
     policy_mean_reg_weight: 0.001
