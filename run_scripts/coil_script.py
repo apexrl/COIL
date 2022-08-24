@@ -6,26 +6,33 @@ import sys
 import inspect
 import pickle
 from gym.spaces import Dict
+from utils import process_d4rl_dataset
 
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+currentdir = os.path.dirname(os.path.abspath(
+    inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 print(sys.path)
 
-from rlkit.envs import get_env
-from rlkit.launchers.launcher_util import setup_logger, set_seed
-import rlkit.torch.pytorch_util as ptu
-from rlkit.torch.coil.coil import COIL
-from rlkit.torch.sac.policies import ReparamTanhMultivariateGaussianPolicy
-from rlkit.torch.phase_offline.phase_offline_coil import PhaseOffline
-from rlkit.envs.wrappers import ScaledEnv
 from rlkit.data_management.episodic_replay_buffer_coil import EpisodicReplayBuffer
+from rlkit.envs.wrappers import ScaledEnv
+from rlkit.torch.phase_offline.phase_offline_coil import PhaseOffline
+from rlkit.torch.sac.policies import ReparamTanhMultivariateGaussianPolicy
+from rlkit.torch.coil.coil import COIL
+import rlkit.torch.pytorch_util as ptu
+from rlkit.launchers.launcher_util import setup_logger, set_seed
+from rlkit.envs import get_env
 
 
 def experiment(variant, **kwargs):
     with open('demos_listing.yaml', 'r') as f:
-        listings = yaml.load(f.read())
+        listings = yaml.load(f.read(), Loader=yaml.FullLoader)
     demos_path = listings[variant['dataset_name']]['file_paths'][0]
+    if not os.path.exists(demos_path):
+        # get task name, e.g. 'hopper-medium-v0'
+        task_name = demos_path.split('/')[-1][:-4]
+        print(f'Downloading and processing {task_name}...')
+        process_d4rl_dataset(task_name, demos_path)
     print("demos_path", demos_path)
     with open(demos_path, 'rb') as f:
         traj_list = pickle.load(f)
@@ -33,7 +40,6 @@ def experiment(variant, **kwargs):
     env_specs = variant['env_specs']
     env_name = env_specs['env_name']
     env = get_env(env_specs)
-
     env.seed(env_specs['eval_env_seed'])
     training_env = get_env(env_specs)
     training_env.seed(env_specs['training_env_seed'])
@@ -55,11 +61,11 @@ def experiment(variant, **kwargs):
     variant.setdefault('data_aug', 1)
     replay_buffer = EpisodicReplayBuffer(
         max_replay_buffer_size, max_sub_buf_size, observation_dim, action_dim,
-        random_seed=env_specs['eval_env_seed'], 
-        bc_sampling_with_rep=variant['bc_sampling_with_rep'], 
+        random_seed=env_specs['eval_env_seed'],
+        bc_sampling_with_rep=variant['bc_sampling_with_rep'],
         traj_sel_crt=variant['traj_sel_crt'],
-        bc_traj_limit=variant['bc_traj_limit'], 
-        only_bc=variant['only_bc'], 
+        bc_traj_limit=variant['bc_traj_limit'],
+        only_bc=variant['only_bc'],
         data_aug=variant['data_aug']
     )
     filter_percent = variant.get('filter_percent', 1)
@@ -135,13 +141,14 @@ def experiment(variant, **kwargs):
 if __name__ == '__main__':
     # Arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-e', '--experiment', help='experiment specification file')
+    parser.add_argument('-e', '--experiment',
+                        help='experiment specification file')
     parser.add_argument('-g', '--gpu', help='gpu id', type=int, default=0)
     parser.add_argument('--snapshot', help='load from snapshot')
     args = parser.parse_args()
     with open(args.experiment, 'r') as spec_file:
         spec_string = spec_file.read()
-        exp_specs = yaml.load(spec_string)
+        exp_specs = yaml.load(spec_string, Loader=yaml.FullLoader)
 
     snapshot = None
     extra_data = None
@@ -167,6 +174,7 @@ if __name__ == '__main__':
     )
     seed = exp_specs['seed']
     set_seed(seed)
-    setup_logger(exp_prefix=exp_prefix, exp_id=exp_id, variant=exp_specs, log_tboard=False)
+    setup_logger(exp_prefix=exp_prefix, exp_id=exp_id,
+                 variant=exp_specs, log_tboard=False)
 
     experiment(exp_specs, snapshot=snapshot, extra_data=extra_data)

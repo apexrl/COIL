@@ -148,4 +148,4 @@ video/
 *.png
 MUJOCO_LOG.TXT
 .idea/
-
+traj_dataset/

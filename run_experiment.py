@@ -18,7 +18,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     with open(args.experiment, 'r') as spec_file:
         spec_string = spec_file.read()
-        exp_specs = yaml.load(spec_string)
+        exp_specs = yaml.load(spec_string, Loader=yaml.FullLoader)
     
     # generating the variants
     vg_fn = build_nested_variant_generator(exp_specs)
