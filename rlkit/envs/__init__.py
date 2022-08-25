@@ -1,6 +1,8 @@
 # Inspired by OpenAI gym registration.py
 import abc
 import importlib
+import gym
+import d4rl
 
 from rlkit.envs.envs_dict import envs_dict
 from rlkit.envs.tasks_dict import tasks_dict
@@ -21,8 +23,11 @@ def get_env(env_specs):
         env_name: 'halfcheetah'
         env_kwargs: {} # kwargs to pass to the env constructor call
     """
-    env_class = load(envs_dict[env_specs['env_name']])
-    env = env_class(**env_specs['env_kwargs'])
+    try:
+        env_class = load(envs_dict[env_specs['env_name']])
+        env = env_class(**env_specs['env_kwargs'])
+    except KeyError or AttributeError:
+        env = gym.make(env_specs['env_name'])
     return env
 
 

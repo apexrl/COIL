@@ -90,3 +90,9 @@ halfcheetah_ex:
   file_paths: [
     traj_dataset/halfcheetah-expert-v0.pkl
   ]
+
+antmaze_umaze:
+  description: "AntMaze, umaze"
+  file_paths: [
+    traj_dataset/antmaze-umaze-v0.pkl
+  ]

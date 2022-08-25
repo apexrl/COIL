@@ -373,6 +373,8 @@ def action_deriviation(traj, policy_func, mode="alpha2"):
     acts = torch.Tensor(traj['actions']).to(ptu.device)
     log_prob = policy_func.get_log_prob(obs, acts, return_normal_params=True)[0]
     log_prob = log_prob.detach().cpu().squeeze().numpy()
+    if np.ndim(log_prob) == 0:
+        log_prob = np.reshape(log_prob, 1)
 
     res = 1.0
 

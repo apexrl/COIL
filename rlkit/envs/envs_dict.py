@@ -13,7 +13,4 @@ envs_dict = {
     'pusher_trace_env': 'rlkit.envs.state_matching_pusher_env_no_obj:PusherTraceEnv',
     'pusher_smm_env': 'rlkit.envs.state_matching_pusher_env:PusherSMMEnv',
     'fetch_push_smm_env': 'rlkit.envs.state_matching_pickup_env:FetchPushSMMEnv',
-
-    # Meta Environments
-
 }

@@ -37,6 +37,9 @@ def process_d4rl_dataset(env_name, save_file, gamma=0.99):
     start = 0
     for traj_ind in range(num_trajs):
         end = indexes[traj_ind] + 1
+        if end - start == 1:
+            start = end
+            continue
         traj_dict = {}
         for key in data_dict.keys():
             traj_dict[key] = data_dict[key][start:end-1]
