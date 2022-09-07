@@ -96,3 +96,10 @@ antmaze_umaze:
   file_paths: [
     traj_dataset/antmaze-umaze-v0.pkl
   ]
+
+antmaze_umaze_diverse:
+  description: "AntMaze, umaze diverse"
+  file_paths: [
+    traj_dataset/antmaze-umaze-diverse-v0.pkl
+  ]
+

@@ -1,8 +1,8 @@
 meta_data:
   script_path: run_scripts/coil_script.py
-  exp_name: test_on_antmaze_umaze
+  exp_name: test_on_antmaze_umaze_diverse
   description: antmaze umaze
-  num_workers: 5
+  num_workers: 2
   num_gpu_per_worker: 1
   num_cpu_per_worker: 32 
   mem_per_worker: 4gb
@@ -13,18 +13,18 @@ meta_data:
 variables:
   offline_params:
     num_bc_update_loops_per_train_call: [ 200 ]
-    filter_tau: [ 0.9 ]
+    filter_tau: [ 0.95 ]
     pretrain_times: [ 0 ]
   bc_traj_limit: [ 2 ]
   traj_sel_crt: [ alpha2 ]
   coil_params:
     policy_lr: [ 0.00003 ]
-  seed: [ 0 ]
+  seed: [ 0, 1 ]
 
 # -----------------------------------------------------------------------------
 constants:
   test: false # true
-  dataset_name: 'antmaze_umaze'
+  dataset_name: 'antmaze_umaze_diverse'
   scale_env_with_demo_stats: false
   only_bc: true
 

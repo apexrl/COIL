@@ -37,13 +37,13 @@ def process_d4rl_dataset(env_name, save_file, gamma=0.99):
     start = 0
     for traj_ind in range(num_trajs):
         end = indexes[traj_ind] + 1
-        if end - start == 1:
-            start = end
-            continue
+        # if end - start == 1:
+        #     start = end
+        #     continue
         traj_dict = {}
         for key in data_dict.keys():
-            traj_dict[key] = data_dict[key][start:end-1]
-        traj_dict['next_observations'] = data_dict['observations'][start + 1: end]
+            traj_dict[key] = data_dict[key][start:end]
+        traj_dict['next_observations'] = [None for _ in range(len(traj_dict['rewards']))] # data_dict['observations'][start + 1: end]
         gamma_array = np.logspace(0, len(traj_dict['rewards']) - 1, len(traj_dict['rewards']), base=gamma)
         traj_dict['ep_discount_rews'] = np.sum(np.array(traj_dict['rewards']) * gamma_array)
         traj_dict['ep_rews'] = np.sum(np.array(traj_dict['rewards']))
