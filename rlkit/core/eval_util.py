@@ -52,6 +52,11 @@ def get_average_returns(paths, get_std=False):
         return np.mean(returns)
 
 
+def get_success_rate(paths):
+    suc = np.sum([np.any(path["rewards"]) for path in paths])
+    return suc / len(paths)
+
+
 def create_stats_ordered_dict(
     name,
     data,

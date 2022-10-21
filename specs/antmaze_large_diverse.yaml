@@ -1,7 +1,7 @@
 meta_data:
   script_path: run_scripts/coil_script.py
-  exp_name: test_on_antmaze_umaze_diverse
-  description: antmaze umaze
+  exp_name: test_on_antmaze_large_diverse
+  description: antmaze large
   num_workers: 3
   num_gpu_per_worker: 1
   num_cpu_per_worker: 32 
@@ -12,10 +12,10 @@ meta_data:
 # -----------------------------------------------------------------------------
 variables:
   offline_params:
-    num_bc_update_loops_per_train_call: [ 10000 ]
-    filter_tau: [ 0.90 ]
+    num_bc_update_loops_per_train_call: [ 5000 ]
+    filter_tau: [ 0.9 ]
     pretrain_times: [ 0 ]
-  bc_traj_limit: [ 100 ]
+  bc_traj_limit: [ 50 ]
   traj_sel_crt: [ alpha2 ]
   coil_params:
     policy_lr: [ 0.0001 ]
@@ -24,7 +24,7 @@ variables:
 # -----------------------------------------------------------------------------
 constants:
   test: false # true
-  dataset_name: 'antmaze_umaze_diverse'
+  dataset_name: 'antmaze_large_diverse'
   scale_env_with_demo_stats: false
   only_bc: true
 
@@ -83,7 +83,7 @@ constants:
     use_l2: false
 
   env_specs:
-    env_name: 'antmaze-umaze-diverse-v0'
+    env_name: 'antmaze-large-diverse-v0'
     env_kwargs: {}
     eval_env_seed: 78236
     training_env_seed: 24495

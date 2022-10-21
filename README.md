@@ -20,3 +20,20 @@ The script of COIL is `run_scripts/coil_script.py`. Dataset settings are in `dem
 For training datasets, put them under the path as you determine in `demos_listing.yaml`. Specifically, D4RL datasets will be automatically downloaded and processed, then put under the determined path.
 
 The environment list is in `rlkit/envs/envs_dict.py`. You can add customized environments by modifying this file. If the environment name in your YAML file is not in `envs_dict`, the program will invoke `gym.make` to build the environment.
+
+---
+
+## Update for AntMaze and spare-reward tasks
+
+We now support [AntMaze](https://github.com/Farama-Foundation/D4RL/wiki/Tasks#antmaze) tasks, and corresponding experiment specifications are under `specs/`. For similar spare-reward tasks that only care about success or failure, one can set `offline_params: mode` in the spec file to `occupancy` instead of `reward`. Under the occupancy mode, the evaluation metric is switched from average return to success rate, which measures the ratio of successfully completing the tasks.
+
+Our evaluation results on AntMaze tasks are listed bellow:
+
+| Dataset | Success Rate |
+|:-------:|:------------:|
+|antmaze-umaze-v0| 0.61 |
+|antmaze-umaze-diverse-v0| 0.58 |
+|antmaze-medium-diverse-v0| 0.01 |
+|antmaze-medium-play-v0| 0.00 |
+|antmaze-large-diverse-v0| 0.00 |
+|antmaze-large-play-v0| 0.00 |

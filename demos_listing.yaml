@@ -103,3 +103,26 @@ antmaze_umaze_diverse:
     traj_dataset/antmaze-umaze-diverse-v0.pkl
   ]
 
+antmaze_medium_diverse:
+  description: "AntMaze, medium diverse"
+  file_paths: [
+    traj_dataset/antmaze-medium-diverse-v0.pkl
+  ]
+
+antmaze_medium_play:
+  description: "AntMaze, medium play"
+  file_paths: [
+    traj_dataset/antmaze-medium-play-v0.pkl
+  ]
+
+antmaze_large_diverse:
+  description: "AntMaze, large diverse"
+  file_paths: [
+    traj_dataset/antmaze-large-diverse-v0.pkl
+  ]
+
+antmaze_large_play:
+  description: "AntMaze, large play"
+  file_paths: [
+    traj_dataset/antmaze-large-play-v0.pkl
+  ]

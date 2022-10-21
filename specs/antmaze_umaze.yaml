@@ -2,7 +2,7 @@ meta_data:
   script_path: run_scripts/coil_script.py
   exp_name: test_on_antmaze_umaze
   description: antmaze umaze
-  num_workers: 2
+  num_workers: 3
   num_gpu_per_worker: 1
   num_cpu_per_worker: 32 
   mem_per_worker: 4gb
@@ -12,14 +12,14 @@ meta_data:
 # -----------------------------------------------------------------------------
 variables:
   offline_params:
-    num_bc_update_loops_per_train_call: [ 200 ]
+    num_bc_update_loops_per_train_call: [ 5000 ]
     filter_tau: [ 0.9 ]
     pretrain_times: [ 0 ]
-  bc_traj_limit: [ 2 ]
+  bc_traj_limit: [ 100 ]
   traj_sel_crt: [ alpha2 ]
   coil_params:
     policy_lr: [ 0.0001 ]
-  seed: [ 0, 1 ]
+  seed: [ 0, 1, 2 ]
 
 # -----------------------------------------------------------------------------
 constants:
@@ -43,7 +43,7 @@ constants:
   gaussian_std: 1.0
 
   offline_params:
-    mode: "reward"
+    mode: "occupancy"
 
     num_epochs: 1000
     num_steps_per_epoch: 10000

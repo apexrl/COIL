@@ -85,7 +85,7 @@ class BaseAlgorithm(metaclass=abc.ABCMeta):
         self.save_environment = save_environment
         self.save_best = save_best
         self.save_best_starting_from_epoch = save_best_starting_from_epoch
-        self.best_key = best_key
+        self.best_key = best_key 
         self.best_statistic_so_far = float('-Inf')
         
         if eval_sampler is None:

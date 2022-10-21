@@ -43,6 +43,8 @@ class PhaseOffline(TorchBaseAlgorithm):
         super().__init__(**kwargs)
 
         self.mode = mode
+        if mode == "occupancy":
+            self.best_key = "SuccessRate"
         self.pretrain_times = pretrain_times
         self.pretrain_num = pretrain_num
 
@@ -65,6 +67,8 @@ class PhaseOffline(TorchBaseAlgorithm):
         self.filter_type = filter_type
         if self.filter_type == "running_mean":
             self.running_mean = min(0, min_reward)
+            if self.mode == "occupancy":
+                self.running_mean = -5
             self.filter_tau = filter_tau if filter_tau else 0.99
         self.shrink_buffer = kwargs.get("shrink_buffer", False)
         self.shrink_count = 0
@@ -266,8 +270,12 @@ class PhaseOffline(TorchBaseAlgorithm):
             if hasattr(self.env, "log_visuals"):
                 self.env.log_visuals(test_paths, epoch, logger.get_snapshot_dir())
         
-        average_returns = eval_util.get_average_returns(test_paths)
-        statistics['AverageReturn'] = average_returns
+        if self.mode == "reward":
+            average_returns = eval_util.get_average_returns(test_paths)
+            statistics['AverageReturn'] = average_returns
+        elif self.mode == "occupancy":
+            success_rate = eval_util.get_success_rate(test_paths)
+            statistics['SuccessRate'] = success_rate
 
         statistics['Total Training Steps'] = self.total_train_steps
         statistics['Used Traj Orders'] = self.used_traj_orders
